@@ -228,6 +228,27 @@ describe('FlowForge - Applications', () => {
                 cy.url().should('include', `/team/${team.slug}/applications`)
             })
     })
+
+    it('check if application has instances, then delete application button should be disabled, and if application has no instances, the button should be enabled', () => {
+        // Check if the application has instances
+        cy.visit('/team/ateam/applications')
+
+        cy.get('[data-action="view-application"]').first().click()
+        cy.url().then(url => {
+            const applicationId = url.split('/')
+            cy.visit(`/application/${applicationId[4]}/settings`)
+            cy.get('[data-action="delete-application"]').should('be.disabled')
+        })
+
+        // Check if the application has no instances
+        cy.visit('/team/ateam/applications')
+        cy.get('[data-action="view-application"]').eq(1).click()
+        cy.url().then(url => {
+            const applicationId = url.split('/')
+            cy.visit(`/application/${applicationId[4]}/settings`)
+            cy.get('[data-action="delete-application"]').should('not.be.disabled')
+        })
+    })
 })
 
 describe('FlowForge - Applications - With Billing', () => {
@@ -261,11 +282,7 @@ describe('FlowForge - Applications - With Billing', () => {
             cy.get('[data-el="selected-instance-type-cost"]').contains('$15.00')
             cy.get('[data-el="selected-instance-type-interval"]').contains('/mo')
 
-            cy.get('[data-el="form-row-description"]').contains('$15.00 now').contains('$15.00/month')
-
-            cy.get('[data-action="create-project"]').should('be.disabled')
-
-            cy.get('[id="billing-confirmation"][data-el="form-row-title"]').click()
+            cy.get('[data-el="payable-now-summary"]').contains('$15.00 now').contains('$15.00 /month')
 
             cy.get('[data-action="create-project"]').should('not.be.disabled').click()
         })
@@ -301,11 +318,7 @@ describe('FlowForge - Applications - With Billing', () => {
             cy.get('[data-el="credit-balance-row"]').should('exist')
             cy.get('[data-el="credit-balance-amount"]').contains('$10.01')
 
-            cy.get('[data-el="form-row-description"]').contains('$4.99 now').contains('$15.00/month')
-
-            cy.get('[data-action="create-project"]').should('be.disabled')
-
-            cy.get('[id="billing-confirmation"][data-el="form-row-title"]').click()
+            cy.get('[data-el="payable-now-summary"]').contains('$4.99')
 
             cy.get('[data-action="create-project"]').should('not.be.disabled').click()
         })

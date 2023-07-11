@@ -89,7 +89,7 @@ module.exports = async function (app) {
             params: {
                 type: 'object',
                 properties: {
-                    teamId: { type: 'string' }
+                    instanceId: { type: 'string' }
                 }
             },
             response: {
@@ -393,7 +393,15 @@ module.exports = async function (app) {
         }
     }, async (request, reply) => {
         try {
-            await app.containers.remove(request.project)
+            try {
+                await app.containers.remove(request.project)
+            } catch (err) {
+                // Swallow no such container error code (as it may have been removed from wrapper already)
+                // https://github.com/apocas/dockerode/blob/edf29ccb2c2c7bfcdd1cf3cacbe861bd0f4bc87a/lib/network.js#L67
+                if (err?.statusCode !== 404) {
+                    throw err
+                }
+            }
 
             if (app.comms) {
                 app.comms.devices.sendCommandToProjectDevices(request.project.Team.hashid, request.project.id, 'update', {

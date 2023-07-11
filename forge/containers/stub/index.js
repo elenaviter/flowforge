@@ -156,7 +156,7 @@ module.exports = {
                 }, 250)
             })
         } else {
-            throw new Error({ error: project.id + ' not found' })
+            throw new Error(`${project.id} not found`)
         }
     },
     /**
@@ -228,27 +228,32 @@ module.exports = {
             {
                 level: 'system',
                 msg: 'Fake Log Entry',
-                ts: `${Date.now() - oneHour}`
+                ts: `${Date.now() - oneHour}`,
+                src: 'one'
             },
             {
                 level: 'system',
                 msg: 'Starting Node-RED',
-                ts: `${Date.now() - oneHour / 2}`
+                ts: `${Date.now() - oneHour / 2}`,
+                src: 'one'
             },
             {
                 level: 'info',
                 msg: '\n\nMulti Line Message\n===================\n',
-                ts: `${Date.now() - oneHour / 4}`
+                ts: `${Date.now() - oneHour / 4}`,
+                src: 'one'
             },
             {
                 level: 'warn',
                 msg: 'This is the voice of the Mysterons. We know that you can hear us Earthmen.',
-                ts: `${Date.now() - oneHour / 5}`
+                ts: `${Date.now() - oneHour / 5}`,
+                src: 'one'
             },
             {
                 level: 'error',
                 msg: 'Captain Scarlet is indestructible',
-                ts: `${Date.now()}`
+                ts: `${Date.now()}`,
+                src: 'two'
             }
         ]
     },

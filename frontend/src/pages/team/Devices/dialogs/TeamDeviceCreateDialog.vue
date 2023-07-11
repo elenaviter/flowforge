@@ -6,14 +6,17 @@
         <template #default>
             <slot name="description" />
             <form class="space-y-6 mt-2">
-                <FormRow v-model="input.name" data-form="device-name" :error="errors.name" :disabled="editDisabled">Name</FormRow>
-                <FormRow v-model="input.type" data-form="device-type" :error="errors.type" :disabled="editDisabled">Type</FormRow>
-                <FormRow v-if="deviceIsBillable" id="billing-confirmation" v-model="input.billingConfirmation" type="checkbox">
-                    Confirm additional charges
-                    <template #description>
-                        {{ billingDescription }}
-                    </template>
+                <FormRow v-model="input.name" data-form="device-name" :error="errors.name" :disabled="editDisabled" container-class="w-full">
+                    <template #default>Name</template>
+                    <template #description>Provide a unique, identifiable name for your device.</template>
                 </FormRow>
+                <FormRow v-model="input.type" data-form="device-type" :error="errors.type" :disabled="editDisabled" container-class="w-full">
+                    <template #default>Type</template>
+                    <template #description>Use this field to better identify your device, and sort/filter in your device list.</template>
+                </FormRow>
+                <div v-if="billingDescription">
+                    <b>Price: {{ billingDescription }}</b>
+                </div>
             </form>
         </template>
     </ff-dialog>
@@ -26,6 +29,7 @@ import devicesApi from '../../../../api/devices.js'
 import teamApi from '../../../../api/team.js'
 
 import FormRow from '../../../../components/FormRow.vue'
+import formatCurrency from '../../../../mixins/Currency.js'
 import alerts from '../../../../services/alerts.js'
 
 export default {
@@ -33,6 +37,7 @@ export default {
     components: {
         FormRow
     },
+    mixins: [formatCurrency],
     props: {
         team: {
             type: Object,
@@ -66,8 +71,7 @@ export default {
             totalDeviceCount: 0,
             input: {
                 name: '',
-                type: '',
-                billingConfirmation: false
+                type: ''
             },
             errors: {},
             editDisabled: false
@@ -81,13 +85,13 @@ export default {
                 (this.team.type.properties.deviceFreeAllocation || 0) <= this.totalDeviceCount // no remaining free allocation
         },
         billingDescription () {
-            if (this.deviceIsBillable) {
-                return `$${this.team.type.properties.billing.deviceCost}/month`
+            if (this.deviceIsBillable && this.team.type.properties.billing?.deviceCost > 0) {
+                return `${this.formatCurrency(this.team.type.properties.billing?.deviceCost * 100)} /month`
             }
             return ''
         },
         formValid () {
-            return this.input.name && (!this.deviceIsBillable || this.input.billingConfirmation)
+            return !!this.input.name
         }
     },
     async mounted () {
